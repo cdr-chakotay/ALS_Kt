@@ -1,0 +1,127 @@
+// Protobuf definitions for Apple's location service protocol.
+// Copyright: Florian Kuenzig - 2026
+// Incorporates work from GrapheneOS NetworkLocation (MIT License)
+// https://github.com/GrapheneOS/platform_packages_apps_NetworkLocation
+// This file is released under the MIT License.
+
+syntax = "proto3";
+
+package als_proto;
+
+option java_outer_classname = "AppleLocationServices";
+
+message ALSLocationRequest {
+  repeated GsmCellTower gsm_cell_towers = 1;
+  repeated WirelessAP wireless_aps = 2;
+  optional int32 number_of_surrounding_gsm_cells = 3;
+  optional int32 number_of_surrounding_wifis = 4;
+
+  optional string app_bundle_id = 5;
+
+  repeated LteCellTower lte_cell_towers = 25;
+  optional int32 number_of_surrounding_lte_cells = 26;
+
+  repeated ScdmaCellTower scdma_cell_towers = 27;
+  optional int32 number_of_surrounding_scdma_cells = 28;
+
+  repeated Nr5GCellTower nr5g_cell_towers = 29;
+  optional int32 number_of_surrounding_nr5g_cells = 30;
+
+  repeated WifiBand surrounding_wifi_bands = 31;
+  optional WifiAltitudeScale wifi_altitude_scale = 32;
+
+  optional ALSMeta meta = 33;
+
+  message ALSMeta {
+    optional string software_build = 1;
+    optional string product_id = 2;
+  }
+
+  enum WifiBand {
+    WIFI_BAND_UNKNOWN = 0;
+    K2DOT4GHZ = 1;
+    K5GHZ = 2;
+  }
+
+  enum WifiAltitudeScale {
+    WIFI_ALTITUDE_SCALE_UNKNOWN = 0;
+    KWIFI_ALTITUDE_SCALE_NONE = 1;
+    KWIFI_ALTITUDE_SCALE_10_TO_THE_2 = 2;
+  }
+}
+
+message ALSLocationResponse {
+  repeated GsmCellTower gsm_cell_towers = 1;
+  repeated WirelessAP wireless_aps = 2;
+
+  repeated LteCellTower lte_cell_towers = 22;
+  repeated ScdmaCellTower scdma_cell_towers = 23;
+  repeated Nr5GCellTower nr5g_cell_towers = 24;
+}
+
+message ALSLocation {
+  int64 latitude = 1;
+  int64 longitude = 2;
+  int32 accuracy = 3;
+  optional int32 location_type = 4;
+  optional int32 altitude = 5;
+  optional int32 vertical_accuracy = 6;
+  optional int32 confidence = 7;
+
+  optional uint32 score = 11;
+  optional int32 reach = 12;
+  optional uint32 info_mask = 13;
+}
+
+// 2G GSM cell tower, also used for 3G UMTS/WCDMA
+message GsmCellTower {
+  int32 mcc = 1;
+  int32 mnc = 2;
+  int32 cell_id = 3;
+  int32 lac_id = 4;
+  optional ALSLocation location = 5;
+
+  optional int32 arcfn = 11;
+  optional int32 psc = 12;
+}
+
+message WirelessAP {
+  string mac_id = 1;
+  optional ALSLocation location = 2;
+
+  optional uint32 channel = 21;
+  optional uint32 num_zaxis_harvest_traces = 22;
+}
+
+// 4G LTE cell tower
+message LteCellTower {
+  optional int32 mcc = 1;
+  optional int32 mnc = 2;
+  optional int32 cell_id = 3;
+  optional int32 tac_id = 4;
+  optional ALSLocation location = 5;
+  optional int32 uarfcn = 6;
+  optional int32 pid = 7;
+}
+
+// 3G TD-SCDMA cell tower
+message ScdmaCellTower {
+  int32 mcc = 1;
+  int32 mnc = 2;
+  int32 cell_id = 3;
+  int32 lac_id = 4;
+  optional ALSLocation location = 5;
+
+  optional int32 arfcn = 11;
+  optional int32 psc = 12;
+}
+
+// 5G NR cell tower
+message Nr5GCellTower {
+  optional int32 mcc = 1;
+  optional int32 mnc = 2;
+  optional int64 cell_id = 3;
+  optional int32 tac_id = 4;
+  optional ALSLocation location = 5;
+  optional int32 nrarfcn = 6;
+}

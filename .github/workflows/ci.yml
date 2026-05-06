@@ -1,0 +1,96 @@
+name: CI
+
+# Run on every push and every PR, regardless of branch
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run tests
+        run: ./gradlew test
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Cache Gradle's downloaded dependencies and wrapper.
+      # The cache key is derived from a hash of the build files.
+      # If dependencies change, the hash changes and the cache is invalidated.
+      # The restore-keys fallback picks up the most recent partial match so we still get a warm cache even when the exact key misses.
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Build the plain library JAR
+      - name: Build library JAR
+        run: ./gradlew jar
+
+      # Build the fat CLI JAR
+      - name: Build CLI JAR
+        run: ./gradlew cliJar
+
+      # Fail fast if either artifact is missing so we catch build regressions
+      - name: Verify artifacts exist
+        run: |
+          test -f build/libs/als_kt.jar     || (echo "Library JAR not found!" && exit 1)
+          test -f build/libs/als_kt-cli.jar || (echo "CLI JAR not found!" && exit 1)
+          echo "Both artifacts present:"
+          ls -lh build/libs/
+
+      # Upload the built JARs so they can be downloaded directly from the Actions run summary
+      - name: Upload library JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: als_kt
+          path: build/libs/als_kt.jar
+
+      - name: Upload CLI JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: als_kt-cli
+          path: build/libs/als_kt-cli.jar

@@ -1,0 +1,7 @@
+/build
+.gradle
+als_proto
+bin
+/.idea/
+.kotlin
+/.vscode
