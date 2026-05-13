@@ -1,4 +1,5 @@
-# ALS_Kt – A Kotlin Library for Apples Location Services 
+# ALS_Kt – A Kotlin Library for Apples Location Services
+
 [![CI](https://github.com/cdr-chakotay/ALS_Kt/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cdr-chakotay/ALS_Kt/actions/workflows/ci.yml)
 
 ALS_Kt is a Kotlin library that provides a simple and efficient way to interact with Apple's Location Services (ALS) using kotlin.
@@ -9,15 +10,45 @@ For convenience, a CLI fat JAR is also provided to query ALS directly from the c
 ## Features
 
 - Query ALS database for cell information based on cell identifiers
-  - Technology type (GSM (2G), WCDMA (3G, UMTS), TD_SCDMA (3G, Mainly China), LTE (4G), NR (5G));
+  - Radio Access Technology (RAT): (GSM (2G), WCDMA (3G, UMTS), TD_SCDMA (3G, Mainly China), LTE (4G), NR (5G));
   - MCC (Mobile Country Code)
   - MNC (Mobile Network Code)
-  - LAC (Location Area Code) / TAC (Tracking Area Code)
+  - Area: LAC (Location Area Code) for 2G, 3G / TAC (Tracking Area Code) for 4G, 5G
   - Cell ID
 - Retrieve location data associated with specific cell towers
 - Unknown cells are returned as a single entry with a null location and can be detected via `ALSQueryCell.isValid()`
 - Coroutine support via `requestCellsAsync`
 - Easy integration with Kotlin projects
+
+### Request and Response
+
+Each request to the ALS database must specify the cell tower lookup parameters listed above: RAT, MCC, MNC, area (LAC/TAC) and cell ID.
+The library returns the response as a list of `ALSQueryCell` objects, which has at least one entry.
+The first entry (index `0`) corresponds to the cell that was queried.
+Any further entries relate to nearby cells reported by ALS alongside the result.
+
+Use `ALSQueryCell.isValid()` to decide how to interpret the response:
+
+- If the first cell is valid, the requested cell is part of ALS's dataset and its `location` approximates the cell tower's position.
+- If the first cell entry is not valid, the queried cell is unknown to ALS and the entire list should be discarded.
+
+`ALSQueryCell.isValid()` returns `true` only when the cell has a non-negative cell ID and its `location` itself is valid and `accuracyMeters > 0`.
+
+Each `ALSQueryCell` exposes the following properties:
+
+- `technology`: The radio access technology of the cell (`GSM`, `WCDMA`, `TD_SCDMA`, `LTE`, `NR`).
+- `country` / `network` / `area` / `cellId`: The identifiers echoed back from the request.
+- `physicalCell`: Physical cell identifier (PCI/PSC). Typically only populated for LTE and 5G, optional.
+- `frequency`: Frequency channel number (ARFCN/UARFCN/EARFCN/NR-ARFCN). Typically only populated for LTE and 5G, optional.
+- `location`: An `ALSQueryLocation` describing the estimated tower position, with:
+  - `latitude` / `longitude`: Decimal degrees.
+  - `accuracyMeters`: Estimated accuracy radius around the cell tower position, in meters.
+  - `reachMeters`: Estimated reception range of the cell tower, in meters.
+  - `score`: Internal ALS quality score for this data point, where 1000 is the maximum value.
+
+Neighboring cells returned within the result list can be cached to avoid frequent requests.
+This should only be done if the first result is valid, since ALS sometimes returned arbitrary data for invalid results.
+Also, `ALSQueryCell.isValid()` should be called on each entry in result list prior to caching as validity of additional results is not guaranteed.
 
 ### Note on the WCDMA return type
 
@@ -78,4 +109,5 @@ ALS_Kt incorporates work from [GrapheneOS NetworkLocation](https://github.com/Gr
 This library is released under the MIT License.
 
 ## Acknowledgements
+
 Special thanks to [Lukas Arnold](https://lukasarnold.de/) for his help with debugging the UMTS lookup and for providing valuable feedback and insights. He also maintains his own ALS Python library in the [BaseTrace repository](https://github.com/seemoo-lab/BaseTrace).
