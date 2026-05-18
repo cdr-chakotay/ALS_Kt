@@ -11,15 +11,16 @@
 
 - 3. Bump the version in `gradle.properties` following [Semantic Versioning](https://semver.org/):
 - 4. Commit `gradle.properties` and `CHANGELOG.md` together with a message like `Release X.Y.Z`, merge to `main`, and wait for the CI to pass.
+- 5. Commit the `README.md` with a version bumped implementation text for Maven central.
 
-- 5. Create the GitHub release
+- 6. Create the GitHub release
      - Go to the repo's [Releases page](https://github.com/cdr-chakotay/ALS_Kt/releases) and draft a new release.
      - Add a matching tag to the version file. Select **"Create new tag on publish"**.
      - Set the release target to `main`.
      - Set release title: `X.Y.Z` and the summary sentence from `CHANGELOG.md`.
      - Paste the matching section from `CHANGELOG.md` as description.
 
-6. Click "Publish release" or cast a pre-release if applicable.
+- 7. Click "Publish release" or cast a pre-release if applicable.
 
 ## If something goes wrong
 

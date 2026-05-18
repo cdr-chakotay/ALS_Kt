@@ -1,6 +1,17 @@
 # ALS_Kt – A Kotlin Library for Apples Location Services
 
 [![CI](https://github.com/cdr-chakotay/ALS_Kt/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cdr-chakotay/ALS_Kt/actions/workflows/ci.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/org.kufl/als_kt.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/org.kufl/als_kt)
+[![Javadoc](https://javadoc.io/badge2/org.kufl/als_kt/javadoc.svg)](https://javadoc.io/doc/org.kufl/als_kt)
+
+## Installation
+
+```kotlin
+implementation("org.kufl:als_kt:0.1.0")
+```
+
+- Maven Central: <https://central.sonatype.com/artifact/org.kufl/als_kt>
+- API docs: <https://javadoc.io/doc/org.kufl/als_kt>
 
 ALS_Kt is a Kotlin library that provides a simple and efficient way to interact with Apple's Location Services (ALS) using kotlin.
 It allows developers to query cell tower information and retrieve location data based on cell identifiers.
@@ -98,7 +109,6 @@ java -jar build/libs/als_kt-cli.jar --tech LTE --mcc 262 --mnc 1 --area 1492 --c
 Currently, not all features are fully implemented. The following tasks are planned for future development:
 
 - [ ] Implement WiFi lookups.
-- [ ] Release on Maven Central for easier integration into projects.
 
 ## Copyright Notice
 
